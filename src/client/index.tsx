@@ -117,7 +117,7 @@ function Inspector() {
                 value: inspectorCallsites[location][0],
               });
             }
-            fetch("http://localhost:3001/update", {
+            fetch("http://localhost:3001/commit", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-import * as babel from "@babel/core";
-import generate from "@babel/generator";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
@@ -12,7 +10,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.post("/update", async (req, res) => {
+app.post("/commit", async (req, res) => {
   const updates: Array<{ fileName: string; position: number; value: string }> =
     req.body.updates;
   const updatesByFile: Record<
@@ -27,7 +25,7 @@ app.post("/update", async (req, res) => {
   });
   await Promise.all(
     Object.keys(updatesByFile).map(async (fileName) => {
-      const file = await new Promise<string>((resolve, reject) => {
+      const contents = await new Promise<string>((resolve, reject) => {
         fs.readFile(fileName, { encoding: "utf8" }, (err, contents) => {
           if (err !== null) {
             reject(err);
@@ -36,38 +34,19 @@ app.post("/update", async (req, res) => {
           resolve(contents);
         });
       });
-      const ast = await babel.parseAsync(file, {
-        presets: ["@babel/preset-react"],
+      // get updates in reverse order
+      const updates = updatesByFile[fileName]
+        .slice()
+        .sort(([aPos], [bPos]) => bPos - aPos);
+      let newContents = contents;
+      updates.forEach(([position, value]) => {
+        const nextParen = newContents.indexOf(")", position);
+        newContents = `${newContents.substring(
+          0,
+          position
+        )}css\`${value}\`${newContents.substring(nextParen + 1)}`;
       });
-      if (ast === null) {
-        throw new Error(`Unable to parse file: ${file}`);
-      }
-      const t = babel.types;
-      babel.traverse(ast, {
-        CallExpression(path) {
-          const positionUpdate = updatesByFile[fileName].find(
-            ([position]) => path.node.start === position
-          );
-          if (positionUpdate !== undefined) {
-            const [, value] = positionUpdate;
-            if (value.trim() !== "") {
-              path.replaceWith(
-                t.taggedTemplateExpression(
-                  t.identifier("css"),
-                  t.templateLiteral(
-                    [t.templateElement({ raw: value }, true)],
-                    []
-                  )
-                )
-              );
-            } else {
-              path.replaceWith(t.identifier("undefined"));
-            }
-          }
-        },
-      });
-      const output = generate(ast, {}, file);
-      const formatted = prettier.format(output.code, { filepath: fileName });
+      const formatted = prettier.format(newContents, { filepath: fileName });
       await new Promise<void>((resolve, reject) =>
         fs.writeFile(fileName, formatted, (err) => {
           if (err !== null) {
