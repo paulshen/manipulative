@@ -40,6 +40,18 @@ app.post("/commit", async (req, res) => {
         .sort(([aPos], [bPos]) => bPos - aPos);
       let newContents = contents;
       updates.forEach(([position, value]) => {
+        const isCssPlaceholderProp =
+          newContents.substring(position, position + "css__".length) ===
+          "css__";
+        if (isCssPlaceholderProp) {
+          newContents = `${newContents.substring(
+            0,
+            position
+          )}css={css\`${value}\`}${newContents.substring(
+            position + "css__".length
+          )}`;
+          return;
+        }
         const nextParen = newContents.indexOf(")", position);
         newContents = `${newContents.substring(
           0,

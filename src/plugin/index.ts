@@ -26,6 +26,53 @@ function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
 function babelPlugin(): PluginObj {
   return {
     visitor: {
+      Program(path, state) {
+        let needsImport = false;
+        const USECSSPLACEHOLDER_IDENTIFIER_NAME = "useCssPlaceholder__INJECT";
+
+        // We're traversing here early before react-refresh does hook extraction.
+        // https://github.com/facebook/react/blob/e6a0f276307fcb2f1c5bc41d630c5e4c9e95a037/packages/react-refresh/src/ReactFreshBabelPlugin.js#L721
+        path.traverse({
+          JSXAttribute(path) {
+            const propName = path.node.name;
+            if (!t.isJSXIdentifier(propName) || propName.name !== "css__") {
+              return;
+            }
+            needsImport = true;
+
+            // TODO: check container for other props named css and warn
+            propName.name = "css";
+            const filename = state.file.opts.filename!;
+            const start = path.node.start!;
+            path.node.value = t.jsxExpressionContainer(
+              t.callExpression(
+                t.identifier(USECSSPLACEHOLDER_IDENTIFIER_NAME),
+                [
+                  t.arrayExpression([
+                    t.stringLiteral(filename),
+                    t.numericLiteral(start),
+                  ]),
+                ]
+              )
+            );
+          },
+        });
+
+        if (needsImport) {
+          path.unshiftContainer("body", [
+            t.importDeclaration(
+              [
+                t.importSpecifier(
+                  t.identifier(USECSSPLACEHOLDER_IDENTIFIER_NAME),
+                  t.identifier("useCssPlaceholder")
+                ),
+              ],
+              t.stringLiteral("manipulative")
+            ),
+          ]);
+        }
+      },
+
       ImportDeclaration(path, state) {
         if (path.node.source.value !== "manipulative") {
           return;
