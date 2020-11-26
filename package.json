@@ -2,6 +2,11 @@
   "name": "manipulative",
   "version": "0.0.1",
   "devDependencies": {
+    "@types/babel__core": "^7.1.12",
     "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/types": "^7.12.7"
   }
 }
