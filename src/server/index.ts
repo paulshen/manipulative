@@ -1,4 +1,6 @@
-import babel from "@babel/core";
+#!/usr/bin/env node
+
+import * as babel from "@babel/core";
 import generate from "@babel/generator";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -13,7 +15,10 @@ app.use(cors());
 app.post("/update", async (req, res) => {
   const updates: Array<{ fileName: string; position: number; value: string }> =
     req.body.updates;
-  const updatesByFile: Record<string, Array<[number, string]>> = {};
+  const updatesByFile: Record<
+    string,
+    Array<[position: number, value: string]>
+  > = {};
   updates.forEach(({ fileName, position, value }) => {
     if (updatesByFile[fileName] === undefined) {
       updatesByFile[fileName] = [];
@@ -44,15 +49,20 @@ app.post("/update", async (req, res) => {
             ([position]) => path.node.start === position
           );
           if (positionUpdate !== undefined) {
-            path.replaceWith(
-              t.taggedTemplateExpression(
-                t.identifier("css"),
-                t.templateLiteral(
-                  [t.templateElement({ raw: positionUpdate[1] }, true)],
-                  []
+            const [, value] = positionUpdate;
+            if (value.trim() !== "") {
+              path.replaceWith(
+                t.taggedTemplateExpression(
+                  t.identifier("css"),
+                  t.templateLiteral(
+                    [t.templateElement({ raw: value }, true)],
+                    []
+                  )
                 )
-              )
-            );
+              );
+            } else {
+              path.replaceWith(t.identifier("undefined"));
+            }
           }
         },
       });

@@ -1,6 +1,10 @@
 {
   "name": "manipulative",
   "version": "0.0.1",
+  "main": "./out/client/index.js",
+  "bin": {
+    "manipulative-server": "./out/server/index.js"
+  },
   "devDependencies": {
     "@types/babel__core": "^7.1.12",
     "@types/body-parser": "^1.19.0",
@@ -14,8 +18,10 @@
   },
   "dependencies": {
     "@babel/core": "^7.12.9",
+    "@babel/preset-react": "^7.12.7",
     "@babel/types": "^7.12.7",
     "@emotion/css": "^11.0.0",
+    "@emotion/react": "^11.1.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -25,5 +31,6 @@
   "peerDependencies": {
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
-  }
+  },
+  "author": "Paul Shen"
 }

@@ -1,11 +1,33 @@
-import { NodePath, PluginObj, types } from "@babel/core";
-import { Identifier, ImportSpecifier } from "@babel/types";
+import { NodePath, PluginObj, PluginPass } from "@babel/core";
+import * as t from "@babel/types";
 
-function babelPlugin({ types: t }: { types: typeof types }): PluginObj {
+function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
+  if (referencePaths !== undefined) {
+    referencePaths.forEach((path) => {
+      const callExpressionNode = path.parentPath.node;
+      if (!t.isCallExpression(callExpressionNode)) {
+        return;
+      }
+
+      const filename = state.file.opts.filename;
+      const start = callExpressionNode.start;
+      if (filename != null && start != null) {
+        callExpressionNode.arguments = [
+          t.arrayExpression([
+            t.stringLiteral(filename),
+            t.numericLiteral(start),
+          ]),
+        ];
+      }
+    });
+  }
+}
+
+function babelPlugin(): PluginObj {
   return {
     visitor: {
       ImportDeclaration(path, state) {
-        if (path.node.source.value !== "./Plugin") {
+        if (path.node.source.value !== "manipulative") {
           return;
         }
         const imports = path.node.specifiers.map((s) => ({
@@ -13,7 +35,7 @@ function babelPlugin({ types: t }: { types: typeof types }): PluginObj {
           importedName:
             s.type === "ImportDefaultSpecifier"
               ? "default"
-              : ((s as ImportSpecifier).imported as Identifier).name,
+              : ((s as t.ImportSpecifier).imported as t.Identifier).name,
         }));
         let shouldExit = false;
         let hasReferences = false;
@@ -34,26 +56,14 @@ function babelPlugin({ types: t }: { types: typeof types }): PluginObj {
         if (!hasReferences || shouldExit) {
           return;
         }
-        const referencePaths = referencePathsByImportName["useStyleDev"];
-        if (referencePaths !== undefined) {
-          referencePaths.forEach((path) => {
-            const callExpressionNode = path.parentPath.node;
-            if (!t.isCallExpression(callExpressionNode)) {
-              return;
-            }
-
-            const filename = state.file.opts.filename;
-            const start = callExpressionNode.start;
-            if (filename != null && start != null) {
-              callExpressionNode.arguments = [
-                t.arrayExpression([
-                  t.stringLiteral(filename),
-                  t.numericLiteral(start),
-                ]),
-              ];
-            }
-          });
-        }
+        processReferencePaths(
+          referencePathsByImportName["useCssPlaceholder"],
+          state
+        );
+        processReferencePaths(
+          referencePathsByImportName["useClassNamePlaceholder"],
+          state
+        );
       },
     },
   };

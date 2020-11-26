@@ -1,7 +1,10 @@
-import { css } from "@emotion/css";
+import { css as cssClassName } from "@emotion/css";
+import { css as cssReact } from "@emotion/react";
 import { EventEmitter } from "events";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+
+const css = cssClassName;
 
 let inspectorCallsites: Record<string, [value: string, hover: boolean]> = {};
 const inspectorEmitter = new EventEmitter();
@@ -45,7 +48,7 @@ function Inspector() {
           text-transform: uppercase;
         `}
       >
-        Inspector
+        manipulative
       </div>
       <div>
         {Object.keys(inspectorCallsites).map((location) => {
@@ -146,10 +149,10 @@ function useForceUpdate() {
   return useCallback(() => s((v) => v + 1), []);
 }
 
-export function useStyleDev([filename, position]: [
-  filename: string,
-  position: number
-]) {
+type Location = [filename: string, position: number];
+
+function usePlaceholder(location: Location, cssFunction: Function) {
+  const [filename, position] = location;
   /* eslint-disable react-hooks/rules-of-hooks */
   const forceUpdate = useForceUpdate();
   useEffect(() => {
@@ -170,8 +173,16 @@ export function useStyleDev([filename, position]: [
   if (value === undefined) {
     return;
   }
-  return css(
+  return cssFunction(
     value[0],
     value[1] === true ? "box-shadow: 0 0 0 1px #ffffff80" : undefined
   );
+}
+
+export function useCssPlaceholder(location: Location) {
+  return usePlaceholder(location, cssReact);
+}
+
+export function useClassNamePlaceholder(location: Location) {
+  return usePlaceholder(location, cssClassName);
 }
