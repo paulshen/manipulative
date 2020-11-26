@@ -179,10 +179,10 @@ function usePlaceholder(location: Location, cssFunction: Function) {
   );
 }
 
-export function useCssPlaceholder(location: Location) {
-  return usePlaceholder(location, cssReact);
+export function useCssPlaceholder(location?: Location) {
+  return usePlaceholder(location!, cssReact);
 }
 
-export function useClassNamePlaceholder(location: Location) {
-  return usePlaceholder(location, cssClassName);
+export function useClassNamePlaceholder(location?: Location) {
+  return usePlaceholder(location!, cssClassName);
 }

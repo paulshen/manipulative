@@ -1,9 +1,18 @@
 {
   "name": "manipulative",
   "version": "0.0.1",
-  "main": "./out/client/index.js",
+  "main": "./dist/client/index.js",
+  "files": [
+    "./dist"
+  ],
   "bin": {
-    "manipulative-server": "./out/server/index.js"
+    "manipulative-server": "./dist/server/index.js"
+  },
+  "types": "./dist/client/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "server": "node dist/server",
+    "prepublishOnly": "npm run-script build"
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.12",
