@@ -16,6 +16,13 @@ function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
           t.arrayExpression([
             t.stringLiteral(filename),
             t.numericLiteral(start),
+            ...(path.node.loc !== null
+              ? [
+                  t.stringLiteral(
+                    state.file.code.split("\n")[path.node.loc.start.line - 1]
+                  ),
+                ]
+              : []),
           ]),
         ];
       }
@@ -29,6 +36,7 @@ function babelPlugin(): PluginObj {
       Program(path, state) {
         let needsImport = false;
         const USECSSPLACEHOLDER_IDENTIFIER_NAME = "useCssPlaceholder__INJECT";
+        const fileLines = state.file.code.split("\n");
 
         // We're traversing here early before react-refresh does hook extraction.
         // https://github.com/facebook/react/blob/e6a0f276307fcb2f1c5bc41d630c5e4c9e95a037/packages/react-refresh/src/ReactFreshBabelPlugin.js#L721
@@ -51,6 +59,13 @@ function babelPlugin(): PluginObj {
                   t.arrayExpression([
                     t.stringLiteral(filename),
                     t.numericLiteral(start),
+                    ...(path.node.loc !== null
+                      ? [
+                          t.stringLiteral(
+                            fileLines[path.node.loc.start.line - 1]
+                          ),
+                        ]
+                      : []),
                   ]),
                 ]
               )

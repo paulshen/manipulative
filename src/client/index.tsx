@@ -6,7 +6,10 @@ import ReactDOM from "react-dom";
 
 const css = cssClassName;
 
-let inspectorCallsites: Record<string, [value: string, hover: boolean]> = {};
+let inspectorCallsites: Record<
+  string,
+  [value: string, hover: boolean, lineCode: string | undefined]
+> = {};
 const inspectorEmitter = new EventEmitter();
 inspectorEmitter.addListener("change", () => {
   console.log(inspectorCallsites);
@@ -26,7 +29,7 @@ function Inspector() {
     <div
       className={css`
         position: fixed;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "SF Mono";
         font-size: 12px;
         top: 0;
         right: 0;
@@ -75,14 +78,19 @@ function Inspector() {
                   margin-bottom: 4px;
                 `}
               >
-                {fileName}{" "}
-                <span
-                  className={css`
-                    color: #b0b0b0;
-                  `}
-                >
-                  {position}
-                </span>
+                <div>
+                  {fileName}{" "}
+                  <span
+                    className={css`
+                      color: #b0b0b0;
+                    `}
+                  >
+                    {position}
+                  </span>
+                </div>
+                {inspectorCallsites[location][2] !== undefined ? (
+                  <div>{inspectorCallsites[location][2]}</div>
+                ) : null}
               </div>
               <div>
                 <textarea
@@ -149,7 +157,7 @@ function useForceUpdate() {
   return useCallback(() => s((v) => v + 1), []);
 }
 
-type Location = [filename: string, position: number];
+type Location = [filename: string, position: number, lineCode?: string];
 
 function usePlaceholder(location: Location, cssFunction: Function) {
   const [filename, position] = location;
@@ -157,7 +165,7 @@ function usePlaceholder(location: Location, cssFunction: Function) {
   const forceUpdate = useForceUpdate();
   useEffect(() => {
     if (inspectorCallsites[`${filename}:${position}`] === undefined) {
-      inspectorCallsites[`${filename}:${position}`] = ["", false];
+      inspectorCallsites[`${filename}:${position}`] = ["", false, location[2]];
     }
     inspectorEmitter.emit("change");
     inspectorEmitter.addListener("change", forceUpdate);
