@@ -131,4 +131,4 @@ function babelPlugin(): PluginObj {
   };
 }
 
-export = babelPlugin;
+module.exports = babelPlugin;
