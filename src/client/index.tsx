@@ -1,28 +1,41 @@
 import { css as cssClassName } from "@emotion/css";
 import { css as cssReact } from "@emotion/react";
-import { EventEmitter } from "events";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
+import create from "zustand";
 
 const css = cssClassName;
 
-let inspectorCallsites: Record<
-  string,
-  [value: string, hover: boolean, lineCode: string | undefined]
-> = {};
-const inspectorEmitter = new EventEmitter();
-inspectorEmitter.addListener("change", () => {
-  console.log(inspectorCallsites);
-});
+type CallsiteValue = {
+  value: string;
+  hover: boolean;
+  codeLine: string | undefined;
+};
+const useStore = create<{
+  callsites: Record<string, CallsiteValue>;
+  updateCallsite: (location: string, value: CallsiteValue) => void;
+  removeCallsite: (location: string) => void;
+}>((set) => ({
+  callsites: {},
+  updateCallsite: (location, value) =>
+    set((state) => ({
+      ...state,
+      callsites: { ...state.callsites, [location]: value },
+    })),
+  removeCallsite: (location) =>
+    set((state) => {
+      const newCallsites = { ...state.callsites };
+      delete newCallsites[location];
+      return {
+        ...state,
+        callsites: newCallsites,
+      };
+    }),
+}));
+
 function Inspector() {
-  const forceUpdate = useForceUpdate();
-  useEffect(() => {
-    inspectorEmitter.addListener("change", forceUpdate);
-    return () => {
-      inspectorEmitter.removeListener("change", forceUpdate);
-    };
-  }, []);
-  if (Object.keys(inspectorCallsites).length === 0) {
+  const { callsites, updateCallsite } = useStore();
+  if (Object.keys(callsites).length === 0) {
     return null;
   }
   return (
@@ -54,7 +67,8 @@ function Inspector() {
         manipulative
       </div>
       <div>
-        {Object.keys(inspectorCallsites).map((location) => {
+        {Object.keys(callsites).map((location) => {
+          const callsite = callsites[location];
           const [filePath, position] = location.split(":");
           const fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
           return (
@@ -66,12 +80,10 @@ function Inspector() {
             >
               <div
                 onMouseOver={() => {
-                  inspectorCallsites[location][1] = true;
-                  inspectorEmitter.emit("change");
+                  updateCallsite(location, { ...callsite, hover: true });
                 }}
                 onMouseOut={() => {
-                  inspectorCallsites[location][1] = false;
-                  inspectorEmitter.emit("change");
+                  updateCallsite(location, { ...callsite, hover: false });
                 }}
                 className={css`
                   font-size: 12px;
@@ -88,16 +100,18 @@ function Inspector() {
                     {position}
                   </span>
                 </div>
-                {inspectorCallsites[location][2] !== undefined ? (
-                  <div>{inspectorCallsites[location][2]}</div>
+                {callsite.codeLine !== undefined ? (
+                  <div>{callsite.codeLine}</div>
                 ) : null}
               </div>
               <div>
                 <textarea
-                  value={inspectorCallsites[location][0]}
+                  value={callsite.value}
                   onChange={(e) => {
-                    inspectorCallsites[location][0] = e.target.value;
-                    inspectorEmitter.emit("change");
+                    updateCallsite(location, {
+                      ...callsite,
+                      value: e.target.value,
+                    });
                   }}
                   className={css`
                     box-sizing: border-box;
@@ -117,12 +131,12 @@ function Inspector() {
         <button
           onClick={() => {
             const updates = [];
-            for (const location in inspectorCallsites) {
+            for (const location in callsites) {
               const [fileName, position] = location.split(":");
               updates.push({
                 fileName,
                 position: parseInt(position),
-                value: inspectorCallsites[location][0],
+                value: callsites[location].value,
               });
             }
             fetch("http://localhost:3001/commit", {
@@ -152,38 +166,27 @@ function mountInspector() {
   isMounted = true;
 }
 
-function useForceUpdate() {
-  const [_, s] = useState(1);
-  return useCallback(() => s((v) => v + 1), []);
-}
-
-type Location = [filename: string, position: number, lineCode?: string];
+type Location = [filename: string, position: number, codeLine?: string];
 
 function usePlaceholder(location: Location, cssFunction: Function) {
-  const [filename, position] = location;
-  /* eslint-disable react-hooks/rules-of-hooks */
-  const forceUpdate = useForceUpdate();
+  const [filename, position, codeLine] = location;
+  const locationKey = `${filename}:${position}`;
+  const callsite = useStore((state) => state.callsites[locationKey]);
+  const updateCallsite = useStore((state) => state.updateCallsite);
+  const removeCallsite = useStore((state) => state.removeCallsite);
   useEffect(() => {
-    if (inspectorCallsites[`${filename}:${position}`] === undefined) {
-      inspectorCallsites[`${filename}:${position}`] = ["", false, location[2]];
-    }
-    inspectorEmitter.emit("change");
-    inspectorEmitter.addListener("change", forceUpdate);
+    updateCallsite(locationKey, { value: "", hover: false, codeLine });
     mountInspector();
     return () => {
-      delete inspectorCallsites[`${filename}:${position}`];
-      inspectorEmitter.removeListener("change", forceUpdate);
-      inspectorEmitter.emit("change");
+      removeCallsite(locationKey);
     };
   }, []);
-  /* eslint-enable react-hooks/rules-of-hooks */
-  const value = inspectorCallsites[`${filename}:${position}`];
-  if (value === undefined) {
+  if (callsite === undefined) {
     return;
   }
   return cssFunction(
-    value[0],
-    value[1] === true ? "box-shadow: 0 0 0 1px #ffffff80" : undefined
+    callsite.value,
+    callsite.hover ? "box-shadow: 0 0 0 1px #ffffff80" : undefined
   );
 }
 
