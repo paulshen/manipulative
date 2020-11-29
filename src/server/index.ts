@@ -114,4 +114,4 @@ app.post("/commit", async (req, res) => {
   }
 });
 
-app.listen(3001);
+app.listen(process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001);

@@ -2,6 +2,7 @@ import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import path from "path";
+import executable from "rollup-plugin-executable";
 
 const { root } = path.parse(process.cwd());
 const external = (id) =>
@@ -73,6 +74,7 @@ function createCommonJSExecutableConfig(input, output) {
       resolve({ extensions }),
       babel(getBabelOptions({ node: 8 })),
       typescript(),
+      executable(),
     ],
   };
 }

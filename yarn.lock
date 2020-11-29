@@ -2109,6 +2109,13 @@ rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
+rollup-plugin-executable@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-executable/-/rollup-plugin-executable-1.6.1.tgz#13e486724afd98866e5bf1932c1a40a22602cee9"
+  integrity sha512-bWFEiThV1MAXd5LUN9BRxsid/DfwHUrvNsCHGbc04yb0riKVei1E9zow6wNFRlorIc+5Y3Vb4WFob03X5yTVJg==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+
 rollup@^2.33.3:
   version "2.33.3"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.33.3.tgz#ae72ce31f992b09a580072951bfea76e9df17342"

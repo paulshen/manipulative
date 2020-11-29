@@ -143,13 +143,18 @@ function Inspector() {
                 value: callsites[location].value,
               });
             }
-            fetch("http://localhost:3001/commit", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ updates }),
-            });
+            fetch(
+              `http://localhost:${
+                process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001
+              }/commit`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ updates }),
+              }
+            );
           }}
         >
           commit
