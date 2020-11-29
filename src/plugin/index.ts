@@ -1,7 +1,10 @@
 import { NodePath, PluginObj, PluginPass } from "@babel/core";
 import * as t from "@babel/types";
 
-function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
+export function processReferencePaths(
+  referencePaths: NodePath[],
+  state: PluginPass
+) {
   if (referencePaths !== undefined) {
     referencePaths.forEach((path) => {
       const callExpressionNode = path.parentPath.node;
@@ -31,7 +34,7 @@ function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
   }
 }
 
-function babelPlugin(): PluginObj {
+export function babelPlugin(): PluginObj {
   return {
     visitor: {
       Program(path, state) {
@@ -128,5 +131,3 @@ function babelPlugin(): PluginObj {
     },
   };
 }
-
-module.exports = babelPlugin;

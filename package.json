@@ -12,7 +12,7 @@
     "build": "rollup -c && yarn ts-declarations",
     "postbuild": "yarn copy",
     "ts-declarations": "tsc --emitDeclarationOnly --declarationDir dist/types --declaration true",
-    "copy": "copyfiles -f package.json dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined;\""
+    "copy": "cp dist/types/client.d.ts dist/types/macro.d.ts && copyfiles -f package.json dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined;\""
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.12.7",
@@ -24,6 +24,7 @@
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-node-resolve": "^10.0.0",
     "@rollup/plugin-typescript": "^6.1.0",
+    "@types/babel-plugin-macros": "^2.8.4",
     "@types/babel__core": "^7.1.12",
     "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.8",
@@ -43,6 +44,7 @@
     "@babel/core": "^7.12.9",
     "@babel/types": "^7.12.7",
     "@emotion/react": "^11.1.1",
+    "babel-plugin-macros": "^3.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",

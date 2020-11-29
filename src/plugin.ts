@@ -1,1 +1,2 @@
-export * from "./plugin/index";
+import { babelPlugin } from "./plugin/index";
+exports = babelPlugin;
