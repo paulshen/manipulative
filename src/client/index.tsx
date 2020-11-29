@@ -7,6 +7,7 @@ import create from "zustand";
 type CallsiteValue = {
   value: string;
   hover: boolean;
+  lineNumber: number | undefined;
   codeLine: string | undefined;
 };
 const useStore = create<{
@@ -90,13 +91,18 @@ function Inspector() {
               >
                 <div>
                   {fileName}{" "}
-                  <span
+                  <a
+                    href={`vscode://file${filePath}${
+                      callsite.lineNumber !== undefined
+                        ? `:${callsite.lineNumber}`
+                        : ""
+                    }`}
                     css={css`
                       color: #b0b0b0;
                     `}
                   >
                     {position}
-                  </span>
+                  </a>
                 </div>
                 {callsite.codeLine !== undefined ? (
                   <div>{callsite.codeLine}</div>
@@ -164,16 +170,26 @@ function mountInspector() {
   isMounted = true;
 }
 
-type Location = [filename: string, position: number, codeLine?: string];
+type Location = [
+  filename: string,
+  position: number,
+  lineNumber?: number,
+  codeLine?: string
+];
 
 function usePlaceholder(location: Location, cssFunction: Function) {
-  const [filename, position, codeLine] = location;
+  const [filename, position, lineNumber, codeLine] = location;
   const locationKey = `${filename}:${position}`;
   const callsite = useStore((state) => state.callsites[locationKey]);
   const updateCallsite = useStore((state) => state.updateCallsite);
   const removeCallsite = useStore((state) => state.removeCallsite);
   useEffect(() => {
-    updateCallsite(locationKey, { value: "", hover: false, codeLine });
+    updateCallsite(locationKey, {
+      value: "",
+      hover: false,
+      lineNumber,
+      codeLine,
+    });
     mountInspector();
     return () => {
       removeCallsite(locationKey);

@@ -18,6 +18,7 @@ function processReferencePaths(referencePaths: NodePath[], state: PluginPass) {
             t.numericLiteral(start),
             ...(path.node.loc !== null
               ? [
+                  t.numericLiteral(path.node.loc.start.line),
                   t.stringLiteral(
                     state.file.code.split("\n")[path.node.loc.start.line - 1]
                   ),
@@ -61,6 +62,7 @@ function babelPlugin(): PluginObj {
                     t.numericLiteral(start),
                     ...(path.node.loc !== null
                       ? [
+                          t.numericLiteral(path.node.loc.start.line),
                           t.stringLiteral(
                             fileLines[path.node.loc.start.line - 1]
                           ),
