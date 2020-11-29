@@ -1,10 +1,8 @@
-import { css as cssClassName } from "@emotion/css";
-import { css as cssReact } from "@emotion/react";
+import { css } from "@emotion/react";
+import {} from "@emotion/react/types/css-prop";
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import create from "zustand";
-
-const css = cssClassName;
 
 type CallsiteValue = {
   value: string;
@@ -40,7 +38,7 @@ function Inspector() {
   }
   return (
     <div
-      className={css`
+      css={css`
         position: fixed;
         font-family: "SF Mono";
         font-size: 12px;
@@ -57,7 +55,7 @@ function Inspector() {
       `}
     >
       <div
-        className={css`
+        css={css`
           font-size: 10px;
           letter-spacing: 0.2px;
           margin-bottom: 8px;
@@ -73,7 +71,7 @@ function Inspector() {
           const fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
           return (
             <div
-              className={css`
+              css={css`
                 margin-bottom: 8px;
               `}
               key={location}
@@ -85,7 +83,7 @@ function Inspector() {
                 onMouseOut={() => {
                   updateCallsite(location, { ...callsite, hover: false });
                 }}
-                className={css`
+                css={css`
                   font-size: 12px;
                   margin-bottom: 4px;
                 `}
@@ -93,7 +91,7 @@ function Inspector() {
                 <div>
                   {fileName}{" "}
                   <span
-                    className={css`
+                    css={css`
                       color: #b0b0b0;
                     `}
                   >
@@ -113,7 +111,7 @@ function Inspector() {
                       value: e.target.value,
                     });
                   }}
-                  className={css`
+                  css={css`
                     box-sizing: border-box;
                     font-family: "SF Mono";
                     font-size: 12px;
@@ -191,9 +189,5 @@ function usePlaceholder(location: Location, cssFunction: Function) {
 }
 
 export function useCssPlaceholder(location?: Location) {
-  return usePlaceholder(location!, cssReact);
-}
-
-export function useClassNamePlaceholder(location?: Location) {
-  return usePlaceholder(location!, cssClassName);
+  return usePlaceholder(location!, css);
 }

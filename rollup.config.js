@@ -21,7 +21,13 @@ const getBabelOptions = (targets) => {
       ["@emotion/babel-preset-css-prop", { sourceMap: false }],
     ],
     plugins: [
-      "@babel/plugin-transform-react-jsx",
+      [
+        "@babel/plugin-transform-react-jsx",
+        {
+          runtime: "automatic",
+          importSource: "@emotion/react",
+        },
+      ],
       ["@babel/plugin-transform-typescript", { isTSX: true }],
     ],
     babelHelpers: "bundled",

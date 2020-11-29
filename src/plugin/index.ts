@@ -122,10 +122,6 @@ function babelPlugin(): PluginObj {
           referencePathsByImportName["useCssPlaceholder"],
           state
         );
-        processReferencePaths(
-          referencePathsByImportName["useClassNamePlaceholder"],
-          state
-        );
       },
     },
   };
