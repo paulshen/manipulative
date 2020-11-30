@@ -98,7 +98,7 @@ async function processFile(
 }
 
 function main() {
-  program.option("-p, --port <port>", "server port", (p) => parseInt(p), 3001);
+  program.option("-p, --port <port>", "server port", (p) => parseInt(p), 3199);
   program.option(
     "--no-prettier",
     "whether to format modified files with prettier"

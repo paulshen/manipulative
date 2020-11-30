@@ -162,7 +162,7 @@ function Inspector() {
               try {
                 await fetch(
                   `http://localhost:${
-                    process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001
+                    process.env.REACT_APP_MANIPULATIVE_PORT ?? 3199
                   }/commit`,
                   {
                     method: "POST",
