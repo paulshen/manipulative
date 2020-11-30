@@ -41,7 +41,6 @@ function Pane({ children }: { children: React.ReactNode }) {
   return (
     <div
       css={css`
-        font-family: "SF Mono";
         font-size: 12px;
         position: fixed;
         top: 16px;
@@ -50,6 +49,13 @@ function Pane({ children }: { children: React.ReactNode }) {
         background-color: #ffffff;
         border-radius: 2px;
         overflow: hidden;
+
+        &,
+        button,
+        textarea {
+          font-family: "SF Mono", Consolas, Menlo, Monaco, "Courier New",
+            Courier, monospace;
+        }
       `}
       ref={rootRef}
     >

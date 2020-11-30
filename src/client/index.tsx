@@ -53,7 +53,6 @@ function Inspector() {
             border-radius: 2px;
             color: #ffffff;
             cursor: pointer;
-            font-family: "SF Mono";
             font-size: 10px;
             letter-spacing: 0.2px;
             padding: 6px 10px;
@@ -106,7 +105,6 @@ function Inspector() {
                   }}
                   css={css`
                     box-sizing: border-box;
-                    font-family: "SF Mono";
                     font-size: 12px;
                     height: 48px;
                     padding: 4px;
