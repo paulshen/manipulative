@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import {} from "@emotion/react/types/css-prop";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import create from "zustand";
 import Pane from "./Pane";
@@ -33,8 +33,11 @@ const useStore = create<{
     }),
 }));
 
+type CommitState = { type: "committing" } | { type: "error"; error: string };
+
 function Inspector() {
   const { callsites, updateCallsite } = useStore();
+  const [commitState, setCommitState] = useState<CommitState>();
   if (Object.keys(callsites).length === 0) {
     return null;
   }
@@ -72,30 +75,26 @@ function Inspector() {
               `}
               key={location}
             >
-              <div
-                onMouseOver={() => {
-                  updateCallsite(location, { ...callsite, hover: true });
-                }}
-                onMouseOut={() => {
-                  updateCallsite(location, { ...callsite, hover: false });
-                }}
-                css={css`
-                  font-size: 12px;
-                  margin-bottom: 4px;
-                `}
-              >
-                {callsite.codeLine !== undefined ? (
-                  <div
-                    css={css`
-                      overflow: hidden;
-                      white-space: nowrap;
-                      text-overflow: ellipsis;
-                    `}
-                  >
-                    {callsite.codeLine}
-                  </div>
-                ) : null}
-              </div>
+              {callsite.codeLine !== undefined ? (
+                <div
+                  onMouseOver={() => {
+                    updateCallsite(location, { ...callsite, hover: true });
+                  }}
+                  onMouseOut={() => {
+                    updateCallsite(location, { ...callsite, hover: false });
+                  }}
+                  css={css`
+                    font-size: 12px;
+                    margin-bottom: 4px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    cursor: default;
+                  `}
+                >
+                  {callsite.codeLine}
+                </div>
+              ) : null}
               <div>
                 <textarea
                   value={callsite.value}
@@ -144,9 +143,14 @@ function Inspector() {
             </div>
           );
         })}
-        <div>
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
           <button
-            onClick={() => {
+            onClick={async () => {
               const updates = [];
               for (const location in callsites) {
                 const [fileName, position] = location.split(":");
@@ -156,22 +160,39 @@ function Inspector() {
                   value: callsites[location].value,
                 });
               }
-              fetch(
-                `http://localhost:${
-                  process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001
-                }/commit`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ updates }),
-                }
-              );
+              setCommitState({ type: "committing" });
+              try {
+                await fetch(
+                  `http://localhost:${
+                    process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001
+                  }/commit`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ updates }),
+                  }
+                );
+                setCommitState(undefined);
+              } catch (e) {
+                setCommitState({ type: "error", error: e.toString() });
+              }
             }}
           >
-            commit
+            {commitState?.type === "committing" ? "committing..." : "commit"}
           </button>
+          {commitState?.type === "error" ? (
+            <div
+              css={css`
+                color: #e45b32;
+                font-size: 10px;
+                margin-left: 8px;
+              `}
+            >
+              {commitState.error}
+            </div>
+          ) : null}
         </div>
       </div>
     </Pane>
