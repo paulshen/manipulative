@@ -96,6 +96,6 @@ export default [
   createESMConfig("src/client.ts", "dist/client.js"),
   createCommonJSConfig("src/client.ts", "dist/client.cjs.js"),
   createCommonJSExecutableConfig("src/server.ts", "dist/server.js"),
-  createCommonJSConfig("src/plugin.ts", "dist/plugin.js"),
+  createCommonJSConfig("src/babel.ts", "dist/babel.js"),
   createCommonJSConfig("src/macro.ts", "dist/macro.js"),
 ];
