@@ -10,7 +10,6 @@ function Pane({ children }: { children: React.ReactNode }) {
   function onHeaderMouseDown(e: React.MouseEvent) {
     let lastPosition = [e.nativeEvent.screenX, e.nativeEvent.screenY];
     function onMouseMove(e: MouseEvent) {
-      debugger;
       const [lastX, lastY] = lastPosition;
       const deltaX = e.screenX - lastX;
       const deltaY = e.screenY - lastY;

@@ -120,6 +120,7 @@ function Inspector() {
                   font-size: 10px;
                   text-align: right;
                   color: #808080;
+                  cursor: default;
                 `}
               >
                 {fileName}{" "}
@@ -218,7 +219,9 @@ function usePlaceholder(location: Location, cssFunction: Function) {
   }
   return cssFunction(
     callsite.value,
-    callsite.hover ? "box-shadow: 0 0 0 1px #ffffff80" : undefined
+    callsite.hover
+      ? "box-shadow: inset 0 0 0 9999px rgba(120, 170, 210, 0.7)"
+      : undefined
   );
 }
 
