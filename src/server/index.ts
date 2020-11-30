@@ -41,7 +41,13 @@ function replacePlaceholder(
   )}`;
 }
 
-async function processFile(fileName: string, updates: Array<Update>) {
+async function processFile(
+  fileName: string,
+  updates: Array<Update>,
+  options: {
+    prettier: boolean;
+  }
+) {
   const contents = await readFile(fileName);
   let newContents = contents;
   let didAddCssCall = false;
@@ -77,7 +83,9 @@ async function processFile(fileName: string, updates: Array<Update>) {
     }
   }
 
-  const formatted = prettier.format(newContents, { filepath: fileName });
+  const formatted = options.prettier
+    ? prettier.format(newContents, { filepath: fileName })
+    : newContents;
   await new Promise<void>((resolve, reject) =>
     fs.writeFile(fileName, formatted, (err) => {
       if (err !== null) {
@@ -91,7 +99,15 @@ async function processFile(fileName: string, updates: Array<Update>) {
 
 function main() {
   program.option("-p, --port <port>", "server port", (p) => parseInt(p), 3001);
+  program.option(
+    "--no-prettier",
+    "whether to format modified files with prettier"
+  );
   program.parse(process.argv);
+
+  const options = {
+    prettier: program.prettier,
+  };
 
   const app = express();
   app.use(bodyParser.json());
@@ -116,9 +132,14 @@ function main() {
     });
     try {
       await Promise.all(
-        Object.keys(updatesByFile).map((fileName) =>
-          processFile(fileName, updatesByFile[fileName])
-        )
+        Object.keys(updatesByFile).map((fileName) => {
+          try {
+            processFile(fileName, updatesByFile[fileName], options);
+            console.log(`modified file ${fileName}`);
+          } catch (err) {
+            console.log(`error updating file ${fileName}`, err);
+          }
+        })
       );
       res.sendStatus(200);
     } catch {
@@ -127,6 +148,8 @@ function main() {
   });
 
   app.listen(program.port);
+  console.log(`manipulative server listening on port ${program.port}`);
+  console.log(`options: ${JSON.stringify(options)}`);
 }
 
 main();
