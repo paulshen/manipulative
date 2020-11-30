@@ -1,12 +1,9 @@
+import { program } from "commander";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 import * as fs from "fs";
 import prettier from "prettier";
-
-const app = express();
-app.use(bodyParser.json());
-app.use(cors());
 
 type Update = [position: number, value: string];
 
@@ -92,26 +89,44 @@ async function processFile(fileName: string, updates: Array<Update>) {
   );
 }
 
-app.post("/commit", async (req, res) => {
-  const updates: Array<{ fileName: string; position: number; value: string }> =
-    req.body.updates;
-  const updatesByFile: Record<string, Array<Update>> = {};
-  updates.forEach(({ fileName, position, value }) => {
-    if (updatesByFile[fileName] === undefined) {
-      updatesByFile[fileName] = [];
-    }
-    updatesByFile[fileName].push([position, value]);
-  });
-  try {
-    await Promise.all(
-      Object.keys(updatesByFile).map((fileName) =>
-        processFile(fileName, updatesByFile[fileName])
-      )
-    );
-    res.sendStatus(200);
-  } catch {
-    res.sendStatus(400);
-  }
-});
+function main() {
+  program.option("-p, --port <port>", "server port", (p) => parseInt(p), 3001);
+  program.parse(process.argv);
 
-app.listen(process.env.REACT_APP_MANIPULATIVE_PORT ?? 3001);
+  const app = express();
+  app.use(bodyParser.json());
+  app.use(cors());
+
+  app.get("/ping", (_, res) => {
+    res.send("pong");
+  });
+
+  app.post("/commit", async (req, res) => {
+    const updates: Array<{
+      fileName: string;
+      position: number;
+      value: string;
+    }> = req.body.updates;
+    const updatesByFile: Record<string, Array<Update>> = {};
+    updates.forEach(({ fileName, position, value }) => {
+      if (updatesByFile[fileName] === undefined) {
+        updatesByFile[fileName] = [];
+      }
+      updatesByFile[fileName].push([position, value]);
+    });
+    try {
+      await Promise.all(
+        Object.keys(updatesByFile).map((fileName) =>
+          processFile(fileName, updatesByFile[fileName])
+        )
+      );
+      res.sendStatus(200);
+    } catch {
+      res.sendStatus(400);
+    }
+  });
+
+  app.listen(program.port);
+}
+
+main();
