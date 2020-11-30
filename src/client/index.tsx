@@ -84,26 +84,12 @@ function Inspector() {
                   margin-bottom: 4px;
                 `}
               >
-                <div>
-                  {fileName}{" "}
-                  <a
-                    href={`vscode://file${filePath}${
-                      callsite.lineNumber !== undefined
-                        ? `:${callsite.lineNumber}`
-                        : ""
-                    }`}
-                    css={css`
-                      color: #b0b0b0;
-                    `}
-                  >
-                    {position}
-                  </a>
-                </div>
                 {callsite.codeLine !== undefined ? (
                   <div
                     css={css`
-                      color: #b0b0b0;
+                      overflow: hidden;
                       white-space: nowrap;
+                      text-overflow: ellipsis;
                     `}
                   >
                     {callsite.codeLine}
@@ -128,6 +114,31 @@ function Inspector() {
                     width: 100%;
                   `}
                 />
+              </div>
+              <div
+                css={css`
+                  font-size: 10px;
+                  text-align: right;
+                  color: #808080;
+                `}
+              >
+                {fileName}{" "}
+                <a
+                  href={`vscode://file${filePath}${
+                    callsite.lineNumber !== undefined
+                      ? `:${callsite.lineNumber}`
+                      : ""
+                  }`}
+                  css={css`
+                    color: #b0b0b0;
+                    text-decoration: none;
+                    :hover {
+                      text-decoration: underline;
+                    }
+                  `}
+                >
+                  {position}
+                </a>
               </div>
             </div>
           );
