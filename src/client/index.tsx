@@ -38,6 +38,10 @@ type CommitState = { type: "committing" } | { type: "error"; error: string };
 function Inspector() {
   const { callsites, updateCallsite } = useStore();
   const [commitState, setCommitState] = useState<CommitState>();
+  useEffect(() => {
+    // clear commit state on fast refresh
+    return () => setCommitState(undefined);
+  }, []);
   if (Object.keys(callsites).length === 0) {
     return null;
   }
@@ -172,7 +176,6 @@ function Inspector() {
                     body: JSON.stringify({ updates }),
                   }
                 );
-                setCommitState(undefined);
               } catch (e) {
                 setCommitState({ type: "error", error: e.toString() });
               }
@@ -239,7 +242,7 @@ function usePlaceholder(location: Location, cssFunction: Function) {
   return cssFunction(
     callsite.value,
     callsite.hover
-      ? "box-shadow: inset 0 0 0 9999px rgba(120, 170, 210, 0.7)"
+      ? cssFunction("box-shadow: inset 0 0 0 9999px rgba(120, 170, 210, 0.7)")
       : undefined
   );
 }

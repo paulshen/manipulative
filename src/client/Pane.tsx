@@ -47,7 +47,9 @@ function Pane({ children }: { children: React.ReactNode }) {
         right: 16px;
         width: 320px;
         background-color: #ffffff;
+        border: 1px solid #b0b0b040;
         border-radius: 2px;
+        color: #404040;
         overflow: hidden;
 
         &,
@@ -67,6 +69,7 @@ function Pane({ children }: { children: React.ReactNode }) {
           font-size: 10px;
           letter-spacing: 0.2px;
           text-transform: uppercase;
+          user-select: none;
           cursor: move;
         `}
         onMouseDown={onHeaderMouseDown}
