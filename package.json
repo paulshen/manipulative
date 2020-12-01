@@ -12,7 +12,7 @@
     "build": "rollup -c && yarn ts-declarations",
     "postbuild": "yarn copy",
     "ts-declarations": "tsc --emitDeclarationOnly --declarationDir dist/types --declaration true",
-    "copy": "cp dist/types/client.d.ts dist/types/macro.d.ts && copyfiles -f package.json dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined;\""
+    "copy": "cp dist/types/client.d.ts dist/types/macro.d.ts && copyfiles -f package.json README.md dist && json -I -f dist/package.json -e \"this.private=false; this.devDependencies=undefined; this.optionalDependencies=undefined;\""
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.12.7",
