@@ -2,7 +2,7 @@
 
 A React devtool for live-updating [Emotion](https://emotion.sh/) styles in the browser. When the styles look good, write them to your source files with one click.
 
-![manipulative demo](manipulative.gif)
+![manipulative demo](./manipulative.gif)
 
 > manipulative is currently alpha-quality software. If manipulative is not working for your use case, please file an issue and I'll try my best to help.
 
