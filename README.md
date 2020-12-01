@@ -94,7 +94,7 @@ const { getBabelLoader } = require("customize-cra");
 
 module.exports = function override(config) {
   getBabelLoader(config).options.plugins.unshift(
-    require.resolve("manipulative/plugin")
+    require.resolve("manipulative/babel")
   );
   return config;
 };
